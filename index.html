@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LabelGuard — Medicine Label Regulatory Compliance | CDSCO, FDA, EU</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: rgba(255,255,255,0.07);
+    --accent: #e8ff5a;
+    --accent2: #5affd8;
+    --accent3: #ff5a8a;
+    --text: #f0f0f0;
+    --muted: #6b6b80;
+    --pass: #5affd8;
+    --warn: #ffb85a;
+    --fail: #ff5a8a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,90,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,90,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Noise texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+
+  /* ── HEADER ── */
+  header {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232,255,90,0.4); }
+    50% { box-shadow: 0 0 20px 6px rgba(232,255,90,0.15); }
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-badge {
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nav-badge.live {
+    border-color: rgba(90,255,216,0.3);
+    color: var(--accent2);
+    background: rgba(90,255,216,0.05);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+    animation: blink 1.4s ease infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 0 56px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .hero-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-label::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 4vw, 3.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin-bottom: 20px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-family: 'Libre Baskerville', serif;
+    color: var(--accent);
+  }
+
+  .hero-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.8;
+    max-width: 380px;
+    margin-bottom: 36px;
+  }
+
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+    font-weight: 500;
+  }
+
+  .btn-primary:hover {
+    background: #f5ff80;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(232,255,90,0.25);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 16px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slide-in 0.6s ease forwards;
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0.1s; }
+  .stat-card:nth-child(2) { animation-delay: 0.2s; }
+  .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes slide-in {
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .stat-left { display: flex; align-items: center; gap: 14px; }
+  .stat-icon { font-size: 1.4rem; }
+  .stat-name { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; }
+  .stat-val.green { color: var(--pass); }
+  .stat-val.yellow { color: var(--warn); }
+  .stat-val.red { color: var(--fail); }
+
+  .stat-bar {
+    width: 80px;
+    height: 4px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .stat-fill {
+    height: 100%;
+    border-radius: 2px;
+    animation: grow 1.2s ease forwards;
+  }
+
+  @keyframes grow { from { width: 0; } }
+
+  /* ── ANALYZER ── */
+  .analyzer-section { padding: 0 0 64px; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .analyzer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  /* Upload Panel */
+  .upload-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+
+  .panel-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .upload-zone {
+    border: 1.5px dashed rgba(232,255,90,0.25);
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(232,255,90,0.04), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .upload-zone:hover { border-color: rgba(232,255,90,0.5); }
+  .upload-zone:hover::before { opacity: 1; }
+
+  .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(232,255,90,0.08);
+  }
+  .upload-zone.drag-over::before { opacity: 1; }
+
+  .upload-zone.has-file .upload-text { color: var(--accent2); }
+  .upload-zone .upload-filename { font-size: 0.8rem; color: var(--accent2); margin-top: 6px; word-break: break-all; }
+
+  .upload-zone input[type="file"] { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
+
+  .upload-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .upload-text { font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+  .upload-sub { font-size: 0.72rem; color: rgba(107,107,128,0.6); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; display: block; }
+  .reg-checkboxes { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+  .reg-cb { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; cursor: pointer; color: var(--text); }
+  .reg-cb input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+  select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  select:focus, textarea:focus { border-color: rgba(232,255,90,0.4); }
+
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  .analyze-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .analyze-btn:hover {
+    background: #f5ff80;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 32px rgba(232,255,90,0.3);
+  }
+
+  .analyze-btn:active { transform: translateY(0); }
+
+  /* Results Panel */
+  .results-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .score-ring-container {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ring-wrapper { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+
+  .ring-svg { transform: rotate(-90deg); }
+
+  .ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 8; }
+
+  .ring-fill {
+    fill: none;
+    stroke: var(--pass);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 263;
+    stroke-dashoffset: 263;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ring-score {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--pass);
+  }
+
+  .ring-unit { font-size: 0.6rem; color: var(--muted); }
+
+  .score-meta h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: var(--pass);
+  }
+
+  .score-meta p { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+
+  /* Compliance items */
+  .compliance-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .compliance-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: fade-up 0.4s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ci-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .ci-icon.pass { background: rgba(90,255,216,0.12); color: var(--pass); }
+  .ci-icon.warn { background: rgba(255,184,90,0.12); color: var(--warn); }
+  .ci-icon.fail { background: rgba(255,90,138,0.12); color: var(--fail); }
+
+  .ci-body { flex: 1; }
+  .ci-title { font-size: 0.82rem; font-weight: 500; margin-bottom: 4px; }
+  .ci-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
+
+  .ci-tag {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .ci-tag.pass { background: rgba(90,255,216,0.1); color: var(--pass); border: 1px solid rgba(90,255,216,0.2); }
+  .ci-tag.warn { background: rgba(255,184,90,0.1); color: var(--warn); border: 1px solid rgba(255,184,90,0.2); }
+  .ci-tag.fail { background: rgba(255,90,138,0.1); color: var(--fail); border: 1px solid rgba(255,90,138,0.2); }
+
+  /* Risk assessment */
+  .risk-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+  }
+  .risk-badge {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .risk-badge.low { background: rgba(90,255,216,0.15); color: var(--pass); border: 1px solid rgba(90,255,216,0.3); }
+  .risk-badge.moderate { background: rgba(255,184,90,0.15); color: var(--warn); border: 1px solid rgba(255,184,90,0.3); }
+  .risk-badge.high { background: rgba(255,90,138,0.15); color: var(--fail); border: 1px solid rgba(255,90,138,0.3); }
+  .risk-title { font-size: 1rem; margin-bottom: 4px; }
+  .risk-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; margin: 0; flex: 1; min-width: 200px; }
+
+  /* Regulation summary */
+  .regulation-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .reg-summary-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .reg-summary-flag { font-size: 1.5rem; display: block; margin-bottom: 8px; }
+  .reg-summary-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 6px; }
+  .reg-summary-status { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+  .reg-summary-status.pass { background: rgba(90,255,216,0.12); color: var(--pass); }
+  .reg-summary-status.warn { background: rgba(255,184,90,0.12); color: var(--warn); }
+  .reg-summary-status.fail { background: rgba(255,90,138,0.12); color: var(--fail); }
+  .reg-summary-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.5; margin: 0; }
+
+  /* Complete check list */
+  .complete-check-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .complete-check-item {
+    font-size: 0.72rem;
+    padding: 6px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+  }
+  .complete-check-item.done { border-color: rgba(90,255,216,0.3); color: var(--pass); }
+
+  /* Issues tabs */
+  .issues-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+  .issue-tab {
+    padding: 10px 20px;
+    font-size: 0.8rem;
+    font-family: 'DM Mono', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .issue-tab:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+  .issue-tab.active { background: var(--surface); border-color: var(--accent); color: var(--accent); }
+  .issues-panels { margin-bottom: 24px; }
+  .issues-panel { display: none; }
+  .issues-panel.active { display: block; }
+  .issue-detail {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .issue-detail.severity-high { border-left: 3px solid var(--fail); }
+  .issue-detail.severity-moderate { border-left: 3px solid var(--warn); }
+  .issue-detail.severity-low { border-left: 3px solid var(--muted); }
+  .issue-detail h4 { font-size: 0.9rem; margin-bottom: 8px; }
+  .issue-detail .issue-reg { font-size: 0.68rem; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .issue-detail .issue-desc { font-size: 0.8rem; line-height: 1.5; color: var(--text); margin-bottom: 8px; }
+  .issue-detail .issue-remedy { font-size: 0.76rem; color: var(--accent2); }
+
+  .api-source-block { margin-top: 8px; }
+  .api-source-text { font-size: 0.72rem; color: var(--muted); }
+
+  /* ── REGULATIONS PANEL ── */
+  .regs-section { padding: 0 0 64px; }
+
+  .regs-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .reg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .reg-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+
+  .reg-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+  .reg-card:hover::after { transform: scaleX(1); }
+  .reg-card.active { border-color: rgba(232,255,90,0.3); background: rgba(232,255,90,0.03); }
+  .reg-card.active::after { transform: scaleX(1); }
+
+  .reg-flag { font-size: 1.8rem; margin-bottom: 12px; }
+  .reg-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+  .reg-full { font-size: 0.68rem; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+  .reg-status { display: flex; align-items: center; gap: 6px; font-size: 0.68rem; }
+  .reg-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pass); }
+
+  /* ── ACTIVITY LOG ── */
+  .activity-section { padding: 0 0 80px; }
+
+  .activity-list { display: flex; flex-direction: column; gap: 1px; }
+
+  .activity-item {
+    display: grid;
+    grid-template-columns: 160px 1fr 100px 120px 100px;
+    gap: 16px;
+    padding: 14px 20px;
+    border-radius: 8px;
+    align-items: center;
+    font-size: 0.78rem;
+    transition: background 0.15s;
+  }
+
+  .activity-item:hover { background: var(--surface); }
+  .activity-item.header { color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); border-radius: 0; margin-bottom: 4px; }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.68rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .status-pill.pass { background: rgba(90,255,216,0.1); color: var(--pass); }
+  .status-pill.warn { background: rgba(255,184,90,0.1); color: var(--warn); }
+  .status-pill.fail { background: rgba(255,90,138,0.1); color: var(--fail); }
+
+  /* ── SAVED REPORTS ── */
+  .reports-section { padding: 0 0 80px; }
+
+  .reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  }
+
+  .report-card:hover {
+    border-color: rgba(232,255,90,0.35);
+    background: rgba(232,255,90,0.02);
+    transform: translateY(-1px);
+  }
+
+  .report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+
+  .report-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .report-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .report-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    font-size: 0.68rem;
+  }
+
+  .report-pill.risk-high { border-color: rgba(255,90,138,0.4); color: var(--fail); }
+  .report-pill.risk-moderate { border-color: rgba(255,184,90,0.4); color: var(--warn); }
+  .report-pill.risk-low { border-color: rgba(90,255,216,0.4); color: var(--pass); }
+
+  .report-body {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .report-card.open .report-body { display: block; }
+
+  .report-body h4 {
+    font-size: 0.8rem;
+    margin: 6px 0 2px;
+    color: var(--text);
+  }
+
+  .report-body ul {
+    padding-left: 18px;
+    margin: 2px 0 6px;
+  }
+
+  .report-body li { margin-bottom: 2px; }
+
+  /* ── Loading animation ── */
+  .scanning-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(10,10,15,0.92);
+    border-radius: 16px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 10;
+  }
+
+  .scanning-overlay.active { display: flex; }
+
+  .scan-ring {
+    width: 60px; height: 60px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .scan-text { font-size: 0.78rem; color: var(--muted); }
+  .scan-sub { font-size: 0.65rem; color: rgba(107,107,128,0.5); }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--muted); }
+  .footer-logo span { color: var(--accent); }
+  .footer-copy { font-size: 0.68rem; color: rgba(107,107,128,0.4); }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🛡</div>
+      <div class="logo-text">Label<span>Guard</span></div>
+    </div>
+    <nav class="nav">
+      <span class="nav-badge">CDSCO India</span>
+      <span class="nav-badge">US FDA</span>
+      <span class="nav-badge">EU</span>
+      <span class="nav-badge live"><span class="live-dot"></span>API Live</span>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-label">Medicine Label Regulatory Intelligence</div>
+      <h1>Medicine <em>label</em> compliance<br>CDSCO · FDA · EU</h1>
+      <p class="hero-desc">
+        Upload any medicine label and get regulatory compliance against CDSCO India, US FDA, and EU regulations—with detailed compliance issues, full checklist, and risk assessment from global medicine APIs.
+      </p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="startAnalysis()">▶ Run Analysis</button>
+        <button class="btn btn-ghost" onclick="viewReports()">View Reports</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon">🇮🇳</div>
+          <div>
+            <div class="stat-name">CDSCO India</div>
+            <div class="stat-val green">Drugs & Cosmetics Rules</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon">🇺🇸</div>
+          <div>
+            <div class="stat-name">US FDA</div>
+            <div class="stat-val yellow">21 CFR · OpenFDA</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-left">
+          <div class="stat-icon">🇪🇺</div>
+          <div>
+            <div class="stat-name">EU</div>
+            <div class="stat-val green">SmPC · Labelling Directive</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYZER -->
+  <section class="analyzer-section">
+    <div class="section-title">Medicine Label Analyzer</div>
+    <div class="analyzer-grid">
+
+      <!-- Input -->
+      <div class="upload-panel">
+        <div class="panel-label">// upload medicine label</div>
+
+        <div class="upload-zone" id="uploadZone" role="button" tabindex="0">
+          <input type="file" id="labelFileInput" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.docx" multiple aria-label="Upload medicine label or image">
+          <div class="upload-icon">💊</div>
+          <div class="upload-text">Drop medicine label or image here</div>
+          <div class="upload-sub">Supports PDF, PNG, JPG, DOCX — or click to browse</div>
+          <div class="upload-filename" id="uploadFilename" aria-live="polite"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Regulations to check</label>
+          <div class="reg-checkboxes">
+            <label class="reg-cb"><input type="checkbox" id="regCDSCO" checked> CDSCO India</label>
+            <label class="reg-cb"><input type="checkbox" id="regFDA" checked> US FDA</label>
+            <label class="reg-cb"><input type="checkbox" id="regEU" checked> EU</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Medicine type</label>
+          <select id="medicineType">
+            <option>Prescription (Schedule H/H1)</option>
+            <option>OTC (Over-the-counter)</option>
+            <option>Generic</option>
+            <option>Vaccine / Biological</option>
+            <option>Ayurvedic / Traditional</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Label text (paste or type — used for API lookup & checks)</label>
+          <textarea id="labelText" placeholder="Paste medicine label content: brand name, active ingredient, dosage, warnings, manufacturer, batch, Mfg licence, expiry…">CROCIN 650mg Tablet
+Paracetamol 650mg
+Use: Fever and mild to moderate pain
+
+Dosage: Adults 1-2 tablets every 4-6 hours. Max 4g in 24 hours.
+
+Warnings: Do not exceed recommended dose. Consult doctor if symptoms persist. Keep out of reach of children.
+
+Manufacturer: GSK Consumer Healthcare
+Batch: BX12345 | Mfg Lic: 123/MFG/2020
+Expiry: 12/2026
+
+Store in a cool, dry place.</textarea>
+        </div>
+
+        <button class="analyze-btn" onclick="runAnalysis()">
+          <span>🔍</span> Analyze Medicine Label
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div class="results-panel" id="resultsPanel" style="position:relative;">
+
+        <div class="scanning-overlay" id="scanOverlay">
+          <div class="scan-ring"></div>
+          <div class="scan-text">Checking CDSCO, FDA & EU regulations…</div>
+          <div class="scan-sub">Fetching global medicine API data</div>
+        </div>
+
+        <div class="panel-label">// compliance report</div>
+
+        <!-- Risk assessment -->
+        <div class="risk-block" id="riskBlock">
+          <div class="risk-badge" id="riskBadge">—</div>
+          <h3 class="risk-title" id="riskTitle">Overall risk</h3>
+          <p class="risk-desc" id="riskDesc">Run analysis to see risk assessment.</p>
+        </div>
+
+        <!-- Compliance score ring -->
+        <div class="score-ring-container">
+          <div class="ring-wrapper">
+            <svg class="ring-svg" width="100" height="100" viewBox="0 0 100 100">
+              <circle class="ring-bg" cx="50" cy="50" r="42"/>
+              <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="42"/>
+            </svg>
+            <div class="ring-label">
+              <div class="ring-score" id="scoreNum">—</div>
+              <div class="ring-unit">/ 100</div>
+            </div>
+          </div>
+          <div class="score-meta">
+            <h3 id="scoreVerdict">Compliance score</h3>
+            <p id="scoreDesc">Based on CDSCO, US FDA and EU checks.</p>
+          </div>
+        </div>
+
+        <!-- Compliance by regulation (CDSCO, FDA, EU) -->
+        <div class="panel-label">// regulation summary</div>
+        <div class="regulation-summary" id="regulationSummary">
+          <div class="reg-summary-item" data-reg="cdsco"><span class="reg-summary-flag">🇮🇳</span><span class="reg-summary-name">CDSCO India</span><span class="reg-summary-status" id="regStatusCDSCO">—</span><p class="reg-summary-desc" id="regDescCDSCO">—</p></div>
+          <div class="reg-summary-item" data-reg="fda"><span class="reg-summary-flag">🇺🇸</span><span class="reg-summary-name">US FDA</span><span class="reg-summary-status" id="regStatusFDA">—</span><p class="reg-summary-desc" id="regDescFDA">—</p></div>
+          <div class="reg-summary-item" data-reg="eu"><span class="reg-summary-flag">🇪🇺</span><span class="reg-summary-name">EU</span><span class="reg-summary-status" id="regStatusEU">—</span><p class="reg-summary-desc" id="regDescEU">—</p></div>
+        </div>
+
+        <!-- Complete check -->
+        <div class="panel-label">// complete check</div>
+        <div class="complete-check-list" id="completeCheckList"></div>
+
+        <!-- Compliance issues: High, Moderate, Low -->
+        <div class="panel-label">// compliance issues (detailed)</div>
+        <div class="issues-tabs">
+          <button type="button" class="issue-tab active" data-severity="high">High</button>
+          <button type="button" class="issue-tab" data-severity="moderate">Moderate</button>
+          <button type="button" class="issue-tab" data-severity="low">Low</button>
+        </div>
+        <div class="issues-panels">
+          <div class="issues-panel active" id="issuesHigh" data-severity="high"></div>
+          <div class="issues-panel" id="issuesModerate" data-severity="moderate"></div>
+          <div class="issues-panel" id="issuesLow" data-severity="low"></div>
+        </div>
+
+        <!-- API / global data source -->
+        <div class="api-source-block" id="apiSourceBlock">
+          <div class="panel-label">// data sources</div>
+          <p class="api-source-text" id="apiSourceText">OpenFDA (US), CDSCO guidelines, EU labelling requirements.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGULATIONS -->
+  <section class="regs-section">
+    <div class="section-title">Supported Regulatory Frameworks</div>
+    <div class="regs-grid">
+
+      <div class="reg-card active">
+        <div class="reg-flag">🇮🇳</div>
+        <div class="reg-name">CDSCO India</div>
+        <div class="reg-full">Drugs and Cosmetics Act &amp; Rules — Central Drugs Standard Control Organisation</div>
+        <div class="reg-status"><span class="reg-dot"></span>Active · Drug labelling rules</div>
+      </div>
+
+      <div class="reg-card">
+        <div class="reg-flag">🇺🇸</div>
+        <div class="reg-name">US FDA 21 CFR</div>
+        <div class="reg-full">Drug labelling — OpenFDA API · Part 201 etc.</div>
+        <div class="reg-status"><span class="reg-dot"></span>Active · OpenFDA</div>
+      </div>
+
+      <div class="reg-card">
+        <div class="reg-flag">🇪🇺</div>
+        <div class="reg-name">EU Labelling</div>
+        <div class="reg-full">Directive 2001/83/EC · SmPC &amp; package leaflet requirements</div>
+        <div class="reg-status"><span class="reg-dot"></span>Active</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ACTIVITY LOG -->
+  <section class="activity-section">
+    <div class="section-title">Recent Medicine Label Scans</div>
+    <div class="activity-list">
+      <div class="activity-item header">
+        <span>Timestamp</span>
+        <span>Product</span>
+        <span>Regulations</span>
+        <span>Score</span>
+        <span>Risk</span>
+      </div>
+      <div class="activity-item">
+        <span style="color:var(--muted)">2026-02-26 10:00</span>
+        <span>Crocin 650mg</span>
+        <span style="color:var(--muted)">CDSCO, FDA, EU</span>
+        <span>82/100</span>
+        <span><span class="status-pill warn">Moderate</span></span>
+      </div>
+      <div class="activity-item">
+        <span style="color:var(--muted)">2026-02-26 09:45</span>
+        <span>Paracetamol 500mg</span>
+        <span style="color:var(--muted)">FDA, EU</span>
+        <span>91/100</span>
+        <span><span class="status-pill pass">Low</span></span>
+      </div>
+      <div class="activity-item">
+        <span style="color:var(--muted)">2026-02-26 09:30</span>
+        <span>Amoxicillin 250mg</span>
+        <span style="color:var(--muted)">CDSCO, FDA</span>
+        <span>76/100</span>
+        <span><span class="status-pill warn">Moderate</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAVED REPORTS -->
+  <section class="reports-section" id="reportsSection">
+    <div class="section-title">Saved Medicine Label Reports</div>
+    <div class="reports-list" id="reportsList">
+      <!-- Filled dynamically after each analysis -->
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Label<span>Guard</span></div>
+    <div class="footer-copy">© 2026 LabelGuard AI · Not a substitute for legal counsel</div>
+  </footer>
+
+</div>
+
+<!-- Client-side OCR for images -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
+<script>
+  const OPENFDA_URL = 'https://api.fda.gov/drug/label.json';
+  let savedReports = [];
+
+  // ── Issue tabs ──
+  document.querySelectorAll('.issue-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const severity = tab.getAttribute('data-severity');
+      if (!severity) return;
+      document.querySelectorAll('.issue-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.issues-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const panelId = 'issues' + severity.charAt(0).toUpperCase() + severity.slice(1);
+      const panel = document.getElementById(panelId);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  function startAnalysis() {
+    document.querySelector('.analyzer-section').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.reg-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.reg-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    });
+  });
+
+  // ── Upload zone ──
+  const uploadZone = document.getElementById('uploadZone');
+  const labelFileInput = document.getElementById('labelFileInput');
+  const uploadFilename = document.getElementById('uploadFilename');
+  const labelTextArea = document.getElementById('labelText');
+  const ACCEPT_TYPES = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+  async function handleFiles(files) {
+    if (!files || !files.length) return;
+    const arr = Array.from(files);
+    const names = arr.map(f => f.name).join(', ');
+    if (uploadFilename) uploadFilename.textContent = names;
+    if (uploadZone) uploadZone.classList.add('has-file');
+
+    const first = arr[0];
+    const isImage = first && (first.type.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(first.name));
+
+    // If it's an image and Tesseract is available, extract text into the label textarea
+    if (isImage && window.Tesseract && labelTextArea) {
+      if (uploadFilename) uploadFilename.textContent = names + ' — extracting text…';
+      try {
+        const result = await Tesseract.recognize(first, 'eng');
+        const text = result && result.data && result.data.text ? result.data.text.trim() : '';
+        if (text) {
+          labelTextArea.value = text;
+        }
+        if (uploadFilename) uploadFilename.textContent = names;
+      } catch (e) {
+        console.error('OCR error', e);
+        if (uploadFilename) uploadFilename.textContent = names + ' — could not extract text';
+      }
+    }
+  }
+
+  if (uploadZone && labelFileInput) {
+    uploadZone.addEventListener('click', (e) => { if (e.target !== labelFileInput) labelFileInput.click(); });
+    uploadZone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); labelFileInput.click(); } });
+    labelFileInput.addEventListener('change', () => handleFiles(labelFileInput.files));
+    uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); uploadZone.classList.add('drag-over'); e.dataTransfer.dropEffect = 'copy'; });
+    uploadZone.addEventListener('dragleave', (e) => { e.preventDefault(); if (!uploadZone.contains(e.relatedTarget)) uploadZone.classList.remove('drag-over'); });
+    uploadZone.addEventListener('dragenter', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (!files.length) return;
+      const valid = Array.from(files).filter(f => ACCEPT_TYPES.includes(f.type) || /\.(pdf|png|jpe?g|gif|webp|docx)$/i.test(f.name));
+      if (valid.length) { handleFiles(valid.length === files.length ? files : valid); if (valid.length < files.length && uploadFilename) uploadFilename.textContent += ' (some skipped)'; }
+      else { if (uploadFilename) uploadFilename.textContent = 'Unsupported type. Use PDF, PNG, JPG, DOCX.'; uploadZone.classList.add('has-file'); }
+    });
+  }
+
+  // ── Extract drug name from label text for API (prefer generic for OpenFDA) ──
+  function extractDrugName(text) {
+    const t = (text || '').trim().toLowerCase();
+    if (/paracetamol|acetaminophen/i.test(t)) return 'acetaminophen';
+    if (/amoxicillin/i.test(t)) return 'amoxicillin';
+    if (/ibuprofen/i.test(t)) return 'ibuprofen';
+    if (/aspirin/i.test(t)) return 'aspirin';
+    if (/metformin/i.test(t)) return 'metformin';
+    const firstLine = (text || '').trim().split(/\r?\n/)[0] || '';
+    const match = firstLine.match(/([A-Za-z]+)(?:\s+\d+\s*mg)?/i);
+    return (match ? match[1] : firstLine.split(/\s+/)[0] || 'acetaminophen').replace(/[^a-zA-Z]/g, '') || 'acetaminophen';
+  }
+
+  // ── Fetch OpenFDA ──
+  async function fetchOpenFDA(drugName) {
+    const q = encodeURIComponent(drugName.replace(/\s+\d+\s*mg/i, '').trim());
+    try {
+      const r = await fetch(OPENFDA_URL + '?search=openfda.generic_name:"' + q + '"&limit=1');
+      if (!r.ok) throw new Error(r.status);
+      const data = await r.json();
+      return data.results && data.results[0] ? data.results[0] : null;
+    } catch (e) {
+      try {
+        const r2 = await fetch(OPENFDA_URL + '?search=brand_name:"' + q + '"&limit=1');
+        if (!r2.ok) return null;
+        const data2 = await r2.json();
+        return data2.results && data2.results[0] ? data2.results[0] : null;
+      } catch (e2) { return null; }
+    }
+  }
+
+  // ── Rule-based compliance: CDSCO, FDA, EU ──
+  function runComplianceChecks(labelText, fdaLabel, options) {
+    const issues = [];
+    const t = (labelText || '').toLowerCase();
+    const has = (str) => t.includes((str || '').toLowerCase());
+    const cdsco = options.cdsco !== false;
+    const fda = options.fda !== false;
+    const eu = options.eu !== false;
+
+    // CDSCO India (Drugs and Cosmetics Rules)
+    if (cdsco) {
+    if (!has('manufacturer') && !has('mfg') && !has('made by')) issues.push({ severity: 'high', regulation: 'CDSCO India', clause: 'Rule 96', title: 'Manufacturer name missing', description: 'CDSCO requires name and address of manufacturer on the label.', recommendation: 'Add full name and address of the manufacturer.' });
+    if (!has('batch') && !has('batch no')) issues.push({ severity: 'high', regulation: 'CDSCO India', clause: 'Rule 96', title: 'Batch number missing', description: 'Batch/Lot number is mandatory for traceability.', recommendation: 'Print batch or lot number on the label.' });
+    if (!has('mfg') && !has('manufacturing') && !has('lic') && !has('license')) issues.push({ severity: 'moderate', regulation: 'CDSCO India', clause: 'Rule 96', title: 'Manufacturing licence not stated', description: 'Mfg. Licence number is required on drug labels in India.', recommendation: 'Include manufacturing licence number as per state drug licence.' });
+    if (!has('expir') && !has('exp ') && !has('use by')) issues.push({ severity: 'high', regulation: 'CDSCO India', clause: 'Rule 96', title: 'Expiry date missing', description: 'Expiry date is mandatory on medicine labels.', recommendation: 'Add expiry date in clear format (e.g. EXP 12/2026).' });
+    if (!has('dosage') && !has('dose') && !has('directions')) issues.push({ severity: 'moderate', regulation: 'CDSCO India', clause: 'Drug labelling', title: 'Dosage instructions unclear', description: 'Dosage and route of administration should be clearly stated.', recommendation: 'Include dosage, frequency and route (e.g. oral).' });
+    if (!has('keep out of reach') && !has('children')) issues.push({ severity: 'high', regulation: 'CDSCO India', clause: 'Rule 96', title: 'Child safety warning missing', description: '"Keep out of reach of children" is mandatory.', recommendation: 'Add: "Keep out of reach of children".' });
+    if (!has('manufacturer') && has('batch') && !has('address')) issues.push({ severity: 'low', regulation: 'CDSCO India', clause: 'Rule 96', title: 'Full manufacturer address', description: 'Complete address with state and PIN improves traceability.', recommendation: 'Include full address with state and PIN code.' });
+    }
+
+    // US FDA (21 CFR)
+    if (fda) {
+    if (!has('warning') && !has('warnings')) issues.push({ severity: 'moderate', regulation: 'US FDA 21 CFR', clause: '§201.57', title: 'Drug warnings not prominent', description: 'FDA requires appropriate warnings for safe use.', recommendation: 'Include a clear Warnings section (e.g. hepatotoxicity for paracetamol).' });
+    if (!has('active ingredient') && !has('paracetamol') && !has('acetaminophen') && !has('ingredient')) issues.push({ severity: 'low', regulation: 'US FDA 21 CFR', clause: '§201.66', title: 'Active ingredient statement', description: 'OTC labels should state active ingredient(s) and quantity.', recommendation: 'Add "Active ingredient: [name] [strength]" on the label.' });
+    if (fdaLabel) {
+      const fdaWarnings = (fdaLabel.warnings && fdaLabel.warnings[0]) ? fdaLabel.warnings[0].toLowerCase() : '';
+      if (fdaWarnings && !has('liver') && (has('paracetamol') || has('acetaminophen'))) issues.push({ severity: 'high', regulation: 'US FDA 21 CFR', title: 'Liver warning for acetaminophen', description: 'FDA requires liver injury warning for acetaminophen. Compare with reference label.', recommendation: 'Add warning about liver damage and avoid alcohol. Data from OpenFDA.' });
+    }
+    }
+
+    // EU (Directive 2001/83/EC)
+    if (eu) {
+    if (!has('name of the medicinal product') && !has('medicinal product')) issues.push({ severity: 'low', regulation: 'EU Directive 2001/83/EC', clause: 'Annex I', title: 'Medicinal product name', description: 'EU requires the name of the medicinal product. Your label may use brand name; ensure it is clear.', recommendation: 'Use approved name and strength (e.g. Paracetamol 650 mg).' });
+    if (!has('therapeutic indication') && !has('use') && !has('indication')) issues.push({ severity: 'moderate', regulation: 'EU Directive 2001/83/EC', title: 'Therapeutic indication', description: 'EU requires therapeutic indications (use) to be stated.', recommendation: 'Include "Use: fever and pain" or equivalent.' });
+    if (!has('storage') && !has('store')) issues.push({ severity: 'moderate', regulation: 'EU Directive 2001/83/EC', title: 'Storage conditions', description: 'Storage conditions are required on the package.', recommendation: 'Add e.g. "Store in a cool, dry place. Protect from light."' });
+    }
+
+    return issues;
+  }
+
+  // ── Complete check list (what we checked) ──
+  function getCompleteChecks(labelText, fdaLabel, issues) {
+    const done = [];
+    const t = (labelText || '').toLowerCase();
+    done.push('Active ingredient / drug name');
+    done.push('Dosage & administration');
+    done.push('Warnings');
+    if (t.includes('manufacturer') || t.includes('mfg')) done.push('Manufacturer');
+    if (t.includes('batch')) done.push('Batch number');
+    if (t.includes('expir') || t.includes('exp ')) done.push('Expiry date');
+    if (t.includes('children') || t.includes('reach')) done.push('Child safety warning');
+    if (t.includes('store') || t.includes('storage')) done.push('Storage conditions');
+    if (fdaLabel) done.push('OpenFDA reference label matched');
+    return done;
+  }
+
+  // ── Risk level and score ──
+  function getRiskAndScore(issues) {
+    const high = issues.filter(i => i.severity === 'high').length;
+    const mod = issues.filter(i => i.severity === 'moderate').length;
+    const low = issues.filter(i => i.severity === 'low').length;
+    let risk = 'low';
+    if (high > 0) risk = 'high';
+    else if (mod > 0) risk = 'moderate';
+    const score = Math.max(0, Math.min(100, 100 - high * 18 - mod * 6 - low * 2));
+    return { risk, score };
+  }
+
+  function escapeHtml(str) {
+    if (str == null) return '';
+    const s = String(str);
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // ── Render results ──
+  function renderResults(result) {
+    if (!result) return;
+    const { risk, score, issues = [], completeChecks = [], fdaLabel, regStatus = {} } = result;
+
+    const riskBadge = document.getElementById('riskBadge');
+    if (riskBadge) { riskBadge.textContent = (risk || 'low').toUpperCase(); riskBadge.className = 'risk-badge ' + (risk || 'low'); }
+    const riskTitle = document.getElementById('riskTitle');
+    if (riskTitle) riskTitle.textContent = 'Overall risk assessment';
+    const riskDesc = document.getElementById('riskDesc');
+    if (riskDesc) riskDesc.textContent = risk === 'high' ? 'One or more high-severity compliance issues were found. Address before market release.' : risk === 'moderate' ? 'Moderate issues found. Review and correct for full compliance.' : 'Low risk. Label is largely compliant; consider addressing low-severity items.';
+
+    const scoreNum = document.getElementById('scoreNum');
+    if (scoreNum) scoreNum.textContent = score != null ? score : '—';
+    const scoreVerdict = document.getElementById('scoreVerdict');
+    if (scoreVerdict) scoreVerdict.textContent = (score >= 80) ? 'Mostly compliant' : (score >= 60) ? 'Moderate compliance' : 'Needs improvement';
+    const scoreDesc = document.getElementById('scoreDesc');
+    if (scoreDesc) scoreDesc.textContent = 'Based on CDSCO India, US FDA and EU checks. ' + (fdaLabel ? 'Reference data from OpenFDA.' : 'No matching OpenFDA label; checks are rule-based.');
+
+    const ring = document.getElementById('ringFill');
+    if (ring) {
+      ring.style.transition = 'stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1)';
+      ring.style.strokeDashoffset = 263 * (1 - (score != null ? score : 0) / 100);
+    }
+
+    ['CDSCO', 'FDA', 'EU'].forEach(reg => {
+      const s = regStatus[reg];
+      const el = document.getElementById('regStatus' + reg);
+      const desc = document.getElementById('regDesc' + reg);
+      if (el) {
+        if (s == null) { el.textContent = '—'; el.className = 'reg-summary-status'; }
+        else { el.textContent = s === 'pass' ? 'Pass' : s === 'fail' ? 'Issues' : 'Warning'; el.className = 'reg-summary-status ' + s; }
+      }
+      if (desc) desc.textContent = s == null ? 'Not selected.' : reg === 'CDSCO' ? 'Drugs and Cosmetics Rules — manufacturer, batch, expiry, dosage, warnings.' : reg === 'FDA' ? (fdaLabel ? 'OpenFDA reference used. 21 CFR labelling requirements checked.' : 'Rule-based check. No OpenFDA match for this product.') : 'EU Directive 2001/83/EC — product name, indications, storage.';
+    });
+
+    const checkList = document.getElementById('completeCheckList');
+    if (checkList) checkList.innerHTML = (completeChecks || []).map(c => '<span class="complete-check-item done">' + escapeHtml(c) + '</span>').join('');
+
+    ['high', 'moderate', 'low'].forEach(sev => {
+      const list = (issues || []).filter(i => i.severity === sev);
+      const panel = document.getElementById('issues' + sev.charAt(0).toUpperCase() + sev.slice(1));
+      if (!panel) return;
+      panel.innerHTML = list.length ? list.map(i => '<div class="issue-detail severity-' + sev + '"><h4>' + escapeHtml(i.title) + '</h4><div class="issue-reg">' + escapeHtml(i.regulation) + (i.clause ? ' · ' + escapeHtml(i.clause) : '') + '</div><p class="issue-desc">' + escapeHtml(i.description) + '</p><p class="issue-remedy">Recommendation: ' + escapeHtml(i.recommendation) + '</p></div>').join('') : '<p class="issue-desc" style="color:var(--muted)">No ' + sev + ' issues.</p>';
+    });
+
+    const apiSourceText = document.getElementById('apiSourceText');
+    if (apiSourceText) apiSourceText.textContent = fdaLabel ? 'OpenFDA (US drug labels), CDSCO India guidelines, EU Directive 2001/83/EC. This tool is not a substitute for legal or regulatory advice.' : 'CDSCO India guidelines, US FDA 21 CFR rules, EU Directive 2001/83/EC. OpenFDA did not return a match for this product name. Not a substitute for legal advice.';
+  }
+
+  // ── Saved reports (per medicine label) ──
+  function saveReportsToStorage() {
+    try {
+      window.localStorage.setItem('labelGuardReports', JSON.stringify(savedReports.slice(-50)));
+    } catch (e) {
+      console.warn('Could not persist reports', e);
+    }
+  }
+
+  function loadReportsFromStorage() {
+    try {
+      const raw = window.localStorage.getItem('labelGuardReports');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) savedReports = parsed;
+    } catch (e) {
+      console.warn('Could not load reports', e);
+    }
+  }
+
+  function renderReports() {
+    const listEl = document.getElementById('reportsList');
+    if (!listEl) return;
+    if (!savedReports.length) {
+      listEl.innerHTML = '<p style="color:var(--muted); font-size:0.8rem;">No reports yet. Run an analysis to save the first report.</p>';
+      return;
+    }
+    listEl.innerHTML = savedReports
+      .slice()
+      .reverse()
+      .map((r, idx) => {
+        const riskClass = r.risk === 'high' ? 'risk-high' : r.risk === 'moderate' ? 'risk-moderate' : 'risk-low';
+        const labelPreview = escapeHtml((r.labelPreview || '').slice(0, 160));
+        const regs = [];
+        if (r.options && r.options.cdsco) regs.push('CDSCO');
+        if (r.options && r.options.fda) regs.push('US FDA');
+        if (r.options && r.options.eu) regs.push('EU');
+        return (
+          '<article class="report-card" data-report-id="' + r.id + '">' +
+            '<div class="report-header">' +
+              '<div>' +
+                '<div class="report-title">' + escapeHtml(r.drugName || 'Unknown medicine') + '</div>' +
+                '<div class="report-meta">' +
+                  '<span>' + escapeHtml(r.createdAtHuman || '') + '</span>' +
+                  (regs.length ? '<span>Regs: ' + regs.join(', ') + '</span>' : '') +
+                  (r.medicineType ? '<span>' + escapeHtml(r.medicineType) + '</span>' : '') +
+                '</div>' +
+              '</div>' +
+              '<div class="report-pill ' + riskClass + '">' +
+                '<span>' + (r.risk || 'low').toUpperCase() + '</span>' +
+                '<span>| ' + (r.score != null ? r.score + '/100' : '—') + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="report-body">' +
+              '<h4>Summary</h4>' +
+              '<p>' + (labelPreview || 'No label text captured.') + '</p>' +
+              '<h4>Checks completed</h4>' +
+              '<ul>' + (r.completeChecks || []).map(c => '<li>' + escapeHtml(c) + '</li>').join('') + '</ul>' +
+              '<h4>High issues</h4>' +
+              '<ul>' + (r.issues || []).filter(i => i.severity === 'high').map(i => '<li>' + escapeHtml(i.title) + ' — ' + escapeHtml(i.regulation || '') + '</li>').join('') + ( (r.issues || []).some(i => i.severity === 'high') ? '' : '<li>None</li>') + '</ul>' +
+              '<h4>Moderate issues</h4>' +
+              '<ul>' + (r.issues || []).filter(i => i.severity === 'moderate').map(i => '<li>' + escapeHtml(i.title) + ' — ' + escapeHtml(i.regulation || '') + '</li>').join('') + ( (r.issues || []).some(i => i.severity === 'moderate') ? '' : '<li>None</li>') + '</ul>' +
+              '<h4>Low issues</h4>' +
+              '<ul>' + (r.issues || []).filter(i => i.severity === 'low').map(i => '<li>' + escapeHtml(i.title) + ' — ' + escapeHtml(i.regulation || '') + '</li>').join('') + ( (r.issues || []).some(i => i.severity === 'low') ? '' : '<li>None</li>') + '</ul>' +
+            '</div>' +
+          '</article>'
+        );
+      })
+      .join('');
+
+    // Toggle open/close on card click
+    Array.from(listEl.querySelectorAll('.report-card')).forEach(card => {
+      card.addEventListener('click', () => {
+        card.classList.toggle('open');
+      });
+    });
+  }
+
+  function viewReports() {
+    const section = document.getElementById('reportsSection');
+    if (section) section.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function runAnalysis() {
+    const overlay = document.getElementById('scanOverlay');
+    if (overlay) overlay.classList.add('active');
+
+    const labelText = (document.getElementById('labelText') && document.getElementById('labelText').value) || '';
+    const drugName = extractDrugName(labelText);
+    const options = {
+      cdsco: document.getElementById('regCDSCO') && document.getElementById('regCDSCO').checked,
+      fda: document.getElementById('regFDA') && document.getElementById('regFDA').checked,
+      eu: document.getElementById('regEU') && document.getElementById('regEU').checked
+    };
+
+    let fdaLabel = null;
+    if (options.fda) {
+      try { fdaLabel = await fetchOpenFDA(drugName); } catch (e) { /* ignore */ }
+    }
+
+    const issues = runComplianceChecks(labelText, fdaLabel, options);
+    const completeChecks = getCompleteChecks(labelText, fdaLabel, issues);
+    const { risk, score } = getRiskAndScore(issues);
+
+    const regStatus = {};
+    if (options.cdsco) {
+      regStatus.CDSCO = issues.some(i => i.regulation.startsWith('CDSCO') && i.severity === 'high') ? 'fail' : issues.some(i => i.regulation.startsWith('CDSCO')) ? 'warn' : 'pass';
+    } else regStatus.CDSCO = null;
+    if (options.fda) {
+      regStatus.FDA = issues.some(i => i.regulation.startsWith('US FDA') && i.severity === 'high') ? 'fail' : issues.some(i => i.regulation.startsWith('US FDA')) ? 'warn' : 'pass';
+    } else regStatus.FDA = null;
+    if (options.eu) {
+      regStatus.EU = issues.some(i => i.regulation.startsWith('EU') && i.severity === 'high') ? 'fail' : issues.some(i => i.regulation.startsWith('EU')) ? 'warn' : 'pass';
+    } else regStatus.EU = null;
+
+    // Save this run as a report
+    const medicineTypeEl = document.getElementById('medicineType');
+    const medicineType = medicineTypeEl ? medicineTypeEl.value : '';
+    const createdAt = new Date();
+    const report = {
+      id: createdAt.getTime() + '-' + Math.random().toString(16).slice(2),
+      createdAt: createdAt.toISOString(),
+      createdAtHuman: createdAt.toLocaleString(),
+      labelText,
+      labelPreview: (labelText || '').split(/\r?\n/).slice(0, 4).join(' '),
+      drugName,
+      medicineType,
+      options,
+      risk,
+      score,
+      regStatus,
+      completeChecks,
+      issues
+    };
+    savedReports.push(report);
+    saveReportsToStorage();
+
+    setTimeout(() => {
+      const overlayEl = document.getElementById('scanOverlay');
+      if (overlayEl) overlayEl.classList.remove('active');
+      renderResults({ risk, score, issues, completeChecks, fdaLabel, regStatus });
+      renderReports();
+    }, 1800);
+  }
+
+  window.addEventListener('load', () => {
+    const ring = document.getElementById('ringFill');
+    if (ring) ring.style.strokeDashoffset = 263;
+    loadReportsFromStorage();
+    renderReports();
+  });
+</script>
+</body>
+</html>
